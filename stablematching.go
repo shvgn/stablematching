@@ -1,9 +1,5 @@
 package stablematching
 
-import (
-	"fmt"
-)
-
 type Table map[string][]string
 
 func newProposors(table Table) map[string]*proposor {
@@ -80,9 +76,6 @@ func NewMatcher(proposorRanks, acceptorRanks Table) *Matcher {
 	}
 }
 
-type Match struct {
-	Proposer, Acceptor string
-}
 type Matcher struct {
 	// pairs map name-by-name from both sides (p -> a and a -> p)
 	pairs map[string]string
@@ -96,18 +89,13 @@ type Matcher struct {
 }
 
 func (m *Matcher) Match() map[string]string {
-	fmt.Println("start matching")
 	go func() {
-		fmt.Println("proposors are inivited to the queue", m.proposors)
 		for pname := range m.proposors {
-			fmt.Println("initial queue", pname)
 			m.free <- pname
 		}
 	}()
 
-	fmt.Println("lets propose in the loop!")
 	for pname := range m.free {
-		fmt.Println("considering free proposor", pname)
 		p := m.proposors[pname]
 		a := m.acceptors[p.next()]
 
@@ -147,7 +135,6 @@ func (m *Matcher) Propose(pname, aname string) {
 
 func (m *Matcher) Enqueue(pname string) {
 	go func() {
-		fmt.Println("enqueuuieiuing proposor", pname)
 		m.free <- pname
 	}()
 }
