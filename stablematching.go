@@ -53,7 +53,7 @@ type acceptor struct {
 	ranks map[string]int
 }
 
-func (a *acceptor) FirstIsPreferred(first, second string) bool {
+func (a *acceptor) firstIsPreferred(first, second string) bool {
 	rank1, ok := a.ranks[first]
 	if !ok {
 		return false
@@ -103,7 +103,7 @@ func (m *Matcher) Match() map[string]string {
 		p := m.proposors[pname]
 		a := m.acceptors[p.next()]
 
-		m.Propose(pname, a.name)
+		m.propose(pname, a.name)
 
 		if len(m.pairs)/2 == len(m.proposors) {
 			close(m.free)
@@ -120,36 +120,31 @@ func (m *Matcher) Match() map[string]string {
 	return matches
 }
 
-func (m *Matcher) Propose(pname, aname string) {
+func (m *Matcher) propose(pname, aname string) {
 	curName, ok := m.pairs[aname]
 	if !ok {
 		// No pair
-		m.Pair(pname, aname)
+		m.pair(pname, aname)
 		return
 	}
 
 	a := m.acceptors[aname]
-	if a.FirstIsPreferred(pname, curName) {
-		m.Pair(pname, aname)
-		m.Enqueue(curName)
+	if a.firstIsPreferred(pname, curName) {
+		m.pair(pname, aname)
+		m.enqueue(curName)
 	} else {
-		m.Enqueue(pname)
+		m.enqueue(pname)
 	}
 }
 
-func (m *Matcher) Enqueue(pname string) {
+func (m *Matcher) enqueue(pname string) {
 	go func() {
 		m.free <- pname
 	}()
 }
 
-// func (m *Matcher) HasPair(pname string) bool {
-// 	_, ok := m.pairs[pname]
-// 	return ok
-// }
-
-// Pair creates a pair for proposer and acceptor
-func (m *Matcher) Pair(pname, aname string) {
+// pair creates a pair for proposer and acceptor
+func (m *Matcher) pair(pname, aname string) {
 	prevname, ok := m.pairs[aname]
 	if ok {
 		delete(m.pairs, aname)
