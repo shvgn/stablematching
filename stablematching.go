@@ -1,8 +1,8 @@
 package stablematching
 
-type Match struct {
-	Proposer, Acceptor string
-}
+import (
+	"fmt"
+)
 
 type Table map[string][]string
 
@@ -74,47 +74,55 @@ func (a *acceptor) FirstIsPreferred(first, second string) bool {
 func NewMatcher(proposorRanks, acceptorRanks Table) *Matcher {
 	return &Matcher{
 		pairs:     make(map[string]string),
-		proposers: newProposors(proposorRanks),
+		proposors: newProposors(proposorRanks),
 		acceptors: newAcceptors(acceptorRanks),
 		free:      make(chan string),
 	}
 }
 
+type Match struct {
+	Proposer, Acceptor string
+}
 type Matcher struct {
 	// pairs map name-by-name from both sides (p -> a and a -> p)
 	pairs map[string]string
 
 	// maps by name
-	proposers map[string]*proposor
+	proposors map[string]*proposor
 	acceptors map[string]*acceptor
 
 	// the free proposers queue
 	free chan string
 }
 
-func (m *Matcher) Match() []Match {
+func (m *Matcher) Match() map[string]string {
+	fmt.Println("start matching")
 	go func() {
-		for pname := range m.proposers {
+		fmt.Println("proposors are inivited to the queue", m.proposors)
+		for pname := range m.proposors {
+			fmt.Println("initial queue", pname)
 			m.free <- pname
 		}
 	}()
 
+	fmt.Println("lets propose in the loop!")
 	for pname := range m.free {
-		p := m.proposers[pname]
+		fmt.Println("considering free proposor", pname)
+		p := m.proposors[pname]
 		a := m.acceptors[p.next()]
 
 		m.Propose(pname, a.name)
 
-		if len(m.pairs)/2 == len(m.proposers) {
+		if len(m.pairs)/2 == len(m.proposors) {
 			close(m.free)
 			break
 		}
 	}
 
-	matches := make([]Match, 0, len(m.proposers))
-	for pname := range m.proposers {
+	matches := make(map[string]string)
+	for pname := range m.proposors {
 		aname := m.pairs[pname]
-		matches = append(matches, Match{Proposer: pname, Acceptor: aname})
+		matches[pname] = aname
 	}
 
 	return matches
@@ -139,6 +147,7 @@ func (m *Matcher) Propose(pname, aname string) {
 
 func (m *Matcher) Enqueue(pname string) {
 	go func() {
+		fmt.Println("enqueuuieiuing proposor", pname)
 		m.free <- pname
 	}()
 }

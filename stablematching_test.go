@@ -5,20 +5,6 @@ import (
 	"testing"
 )
 
-var proposorRanks = Table{
-	"p1": {"a1", "a2", "a3", "a4"},
-	"p2": {"a4", "a3", "a1", "a2"},
-	"p3": {"a1", "a4", "a3", "a2"},
-	"p4": {"a1", "a4", "a3", "a2"},
-}
-
-var acceptorRanks = Table{
-	"a1": {"p3", "p2", "p4", "p1"},
-	"a2": {"p3", "p2", "p4", "p1"},
-	"a3": {"p2", "p3", "p1", "p4"},
-	"a4": {"p4", "p3", "p2", "p1"},
-}
-
 func Test_findMatch(t *testing.T) {
 	// match(proposors, acceptors []Ranker) ([]Match, error)
 
@@ -41,45 +27,68 @@ func Test_findMatch(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    []Match
+		want    map[string]string
 		wantErr bool
 	}{
+		// {
+		// 	name: "zero",
+		// 	args: args{},
+		// 	want: []Match{},
+		// },
 		{
-			name: "zero",
-			args: args{},
-			want: []Match{},
+			name: "1×1",
+			args: args{
+				proposors: Table{"p": []string{"a"}},
+				acceptors: Table{"a": []string{"p"}},
+			},
+			want: map[string]string{"p": "a"},
 		},
-		// {
-		// 	name: "1×1",
-		// 	args: args{
-		// 		proposors: Table{"p": []string{"a"}},
-		// 		acceptors: Table{"a": []string{"p"}},
-		// 	},
-		// 	want: []Match{{Proposer: "p", Acceptor: "a"}},
-		// },
-		// {
-		// 	name: "4×4",
-		// 	args: args{
-		// 		proposors: Table{
-		// 			"p1": {"a1", "a2", "a3", "a4"},
-		// 			"p2": {"a4", "a3", "a1", "a2"},
-		// 			"p3": {"a1", "a4", "a3", "a2"},
-		// 			"p4": {"a1", "a4", "a3", "a2"},
-		// 		},
-		// 		acceptors: Table{
-		// 			"a1": {"p3", "p2", "p4", "p1"},
-		// 			"a2": {"p3", "p2", "p4", "p1"},
-		// 			"a3": {"p2", "p3", "p1", "p4"},
-		// 			"a4": {"p4", "p3", "p2", "p1"},
-		// 		},
-		// 	},
-		// 	want: []Match{
-		// 		{Proposer: "p3", Acceptor: "a1"},
-		// 		{Proposer: "p4", Acceptor: "a4"},
-		// 		{Proposer: "p2", Acceptor: "a3"},
-		// 		{Proposer: "p1", Acceptor: "a2"},
-		// 	},
-		// },
+		{
+			name: "4×4",
+			args: args{
+				proposors: Table{
+					"p1": {"a1", "a2", "a3", "a4"},
+					"p2": {"a4", "a3", "a1", "a2"},
+					"p3": {"a1", "a4", "a3", "a2"},
+					"p4": {"a1", "a4", "a3", "a2"},
+				},
+				acceptors: Table{
+					"a1": {"p3", "p2", "p4", "p1"},
+					"a2": {"p3", "p2", "p4", "p1"},
+					"a3": {"p2", "p3", "p1", "p4"},
+					"a4": {"p4", "p3", "p2", "p1"},
+				},
+			},
+			want: map[string]string{
+				"p1": "a2",
+				"p2": "a3",
+				"p3": "a1",
+				"p4": "a4",
+			},
+		},
+		{
+			name: "4×4 (swapped)",
+			args: args{
+				proposors: Table{
+					"a1": {"p3", "p2", "p4", "p1"},
+					"a2": {"p3", "p2", "p4", "p1"},
+					"a3": {"p2", "p3", "p1", "p4"},
+					"a4": {"p4", "p3", "p2", "p1"},
+				},
+				acceptors: Table{
+					"p1": {"a1", "a2", "a3", "a4"},
+					"p2": {"a4", "a3", "a1", "a2"},
+					"p3": {"a1", "a4", "a3", "a2"},
+					"p4": {"a1", "a4", "a3", "a2"},
+				},
+			},
+			want: map[string]string{
+				"a1": "p3",
+				"a2": "p1",
+				"a3": "p2",
+				"a4": "p4",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
