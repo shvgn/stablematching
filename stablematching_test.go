@@ -30,7 +30,7 @@ func Test_MatherMatch(t *testing.T) {
 			want: map[string]string{"p": "a"},
 		},
 		{
-			name: "4×4",
+			name: "4×4 arbitrary",
 			args: args{
 				proposors: Table{
 					"p1": {"a1", "a2", "a3", "a4"},
@@ -76,7 +76,7 @@ func Test_MatherMatch(t *testing.T) {
 			},
 		},
 		{
-			name: "4×4 all the same preferences",
+			name: "4×4 all the same ordered preferences",
 			args: args{
 				proposors: Table{
 					"p1": {"a1", "a2", "a3", "a4"},
@@ -99,13 +99,13 @@ func Test_MatherMatch(t *testing.T) {
 			},
 		},
 		{
-			name: "4×4 reversed preferences in a' preserve p's preference",
+			name: "4×4 all the same reversed preferences",
 			args: args{
 				proposors: Table{
-					"p1": {"a1", "a2", "a3", "a4"},
-					"p2": {"a1", "a2", "a3", "a4"},
-					"p3": {"a1", "a2", "a3", "a4"},
-					"p4": {"a1", "a2", "a3", "a4"},
+					"p1": {"a4", "a3", "a2", "a1"},
+					"p2": {"a4", "a3", "a2", "a1"},
+					"p3": {"a4", "a3", "a2", "a1"},
+					"p4": {"a4", "a3", "a2", "a1"},
 				},
 				acceptors: Table{
 					"a1": {"p4", "p3", "p2", "p1"},
@@ -121,28 +121,27 @@ func Test_MatherMatch(t *testing.T) {
 				"p4": "a4",
 			},
 		},
-
 		{
-			name: "4×4 reversed preferences in p' wins straiht a' preference",
+			name: "4×4 p's preference are preserved",
 			args: args{
 				proposors: Table{
-					"p1": {"a4", "a3", "a2", "a1"},
-					"p2": {"a4", "a3", "a2", "a1"},
-					"p3": {"a4", "a3", "a2", "a1"},
-					"p4": {"a4", "a3", "a2", "a1"},
+					"p1": {"a1", "a2", "a3", "a4"},
+					"p2": {"a2", "a3", "a4", "a1"},
+					"p3": {"a3", "a4", "a1", "a2"},
+					"p4": {"a4", "a1", "a2", "a3"},
 				},
 				acceptors: Table{
-					"a1": {"p1", "p2", "p3", "p4"},
-					"a2": {"p1", "p2", "p3", "p4"},
-					"a3": {"p1", "p2", "p3", "p4"},
-					"a4": {"p1", "p2", "p3", "p4"},
+					"a1": {"p4", "p3", "p2", "p1"},
+					"a2": {"p4", "p3", "p2", "p1"},
+					"a3": {"p4", "p3", "p2", "p1"},
+					"a4": {"p4", "p3", "p2", "p1"},
 				},
 			},
 			want: map[string]string{
-				"p1": "a4",
-				"p2": "a3",
-				"p3": "a2",
-				"p4": "a1",
+				"p1": "a1",
+				"p2": "a2",
+				"p3": "a3",
+				"p4": "a4",
 			},
 		},
 	}
