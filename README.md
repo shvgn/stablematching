@@ -7,7 +7,7 @@ Gale-Shapley algoritm implementation in Go. Inspired by [Numberphile video](http
 - N×N table of proposors preferences
 - N×N table of acceptors preferences
 
-The mather relies on the same number of proposors and acceptors.
+The matcher relies on the same number of proposors and acceptors.
 
 ```go
 proposors := Table{
