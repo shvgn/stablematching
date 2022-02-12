@@ -30,11 +30,11 @@ func Test_findMatch(t *testing.T) {
 		want    map[string]string
 		wantErr bool
 	}{
-		// {
-		// 	name: "zero",
-		// 	args: args{},
-		// 	want: []Match{},
-		// },
+		{
+			name: "zero",
+			args: args{},
+			want: map[string]string{},
+		},
 		{
 			name: "1×1",
 			args: args{

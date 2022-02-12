@@ -89,6 +89,10 @@ type Matcher struct {
 }
 
 func (m *Matcher) Match() map[string]string {
+	if len(m.proposors) == 0 {
+		return make(map[string]string)
+	}
+
 	go func() {
 		for pname := range m.proposors {
 			m.free <- pname
