@@ -27,3 +27,7 @@ acceptors := Table{
 matcher := NewMatcher(proposors, acceptors)
 matches := matcher.Match() // map[p1:a4 p2:a3 p3:a2 p4:a1]
 ```
+
+## License
+
+MIT
