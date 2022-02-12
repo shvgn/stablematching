@@ -5,21 +5,7 @@ import (
 	"testing"
 )
 
-func Test_findMatch(t *testing.T) {
-	// match(proposors, acceptors []Ranker) ([]Match, error)
-
-	//var (
-	//	p1 = &ranker{"p1", proposorRanks}
-	//	p2 = &ranker{"p2", proposorRanks}
-	//	p3 = &ranker{"p3", proposorRanks}
-	//	p4 = &ranker{"p4", proposorRanks}
-	//
-	//	a1 = &ranker{"a1", acceptorRanks}
-	//	a2 = &ranker{"a2", acceptorRanks}
-	//	a3 = &ranker{"a3", acceptorRanks}
-	//	a4 = &ranker{"a4", acceptorRanks}
-	//)
-
+func Test_MatherMatch(t *testing.T) {
 	type args struct {
 		proposors Table
 		acceptors Table
@@ -87,6 +73,76 @@ func Test_findMatch(t *testing.T) {
 				"a2": "p1",
 				"a3": "p2",
 				"a4": "p4",
+			},
+		},
+		{
+			name: "4×4 all the same preferences",
+			args: args{
+				proposors: Table{
+					"p1": {"a1", "a2", "a3", "a4"},
+					"p2": {"a1", "a2", "a3", "a4"},
+					"p3": {"a1", "a2", "a3", "a4"},
+					"p4": {"a1", "a2", "a3", "a4"},
+				},
+				acceptors: Table{
+					"a1": {"p1", "p2", "p3", "p4"},
+					"a2": {"p1", "p2", "p3", "p4"},
+					"a3": {"p1", "p2", "p3", "p4"},
+					"a4": {"p1", "p2", "p3", "p4"},
+				},
+			},
+			want: map[string]string{
+				"p1": "a1",
+				"p2": "a2",
+				"p3": "a3",
+				"p4": "a4",
+			},
+		},
+		{
+			name: "4×4 reversed preferences in a' preserve p's preference",
+			args: args{
+				proposors: Table{
+					"p1": {"a1", "a2", "a3", "a4"},
+					"p2": {"a1", "a2", "a3", "a4"},
+					"p3": {"a1", "a2", "a3", "a4"},
+					"p4": {"a1", "a2", "a3", "a4"},
+				},
+				acceptors: Table{
+					"a1": {"p4", "p3", "p2", "p1"},
+					"a2": {"p4", "p3", "p2", "p1"},
+					"a3": {"p4", "p3", "p2", "p1"},
+					"a4": {"p4", "p3", "p2", "p1"},
+				},
+			},
+			want: map[string]string{
+				"p1": "a1",
+				"p2": "a2",
+				"p3": "a3",
+				"p4": "a4",
+			},
+		},
+
+		{
+			name: "4×4 reversed preferences in p' wins straiht a' preference",
+			args: args{
+				proposors: Table{
+					"p1": {"a4", "a3", "a2", "a1"},
+					"p2": {"a4", "a3", "a2", "a1"},
+					"p3": {"a4", "a3", "a2", "a1"},
+					"p4": {"a4", "a3", "a2", "a1"},
+				},
+				acceptors: Table{
+					"a1": {"p1", "p2", "p3", "p4"},
+					"a2": {"p1", "p2", "p3", "p4"},
+					"a3": {"p1", "p2", "p3", "p4"},
+					"a4": {"p1", "p2", "p3", "p4"},
+				},
+			},
+			want: map[string]string{
+				"p1": "a4",
+				"p2": "a3",
+				"p3": "a2",
+				"p4": "a1",
 			},
 		},
 	}
