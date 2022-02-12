@@ -1,66 +1,83 @@
 package stablematching
 
-import (
-	"math"
-)
-
 type Match struct {
 	Proposer, Acceptor string
 }
 
-type ranker struct {
-	name  string
-	seen  int
-	toSee []string
+type Table map[string][]string
+
+func newProposors(table Table) map[string]*proposor {
+	ps := make(map[string]*proposor)
+	for name, ranks := range table {
+		ps[name] = newProposor(name, ranks)
+	}
+	return ps
 }
 
-func (r *ranker) next() string {
-	r.seen++
-	return r.toSee[r.seen]
-}
-
-func newRanker(name string, toSee []string) *ranker {
-	return &ranker{
+func newProposor(name string, toSee []string) *proposor {
+	return &proposor{
 		name:  name,
 		seen:  -1,
 		toSee: toSee,
 	}
 }
 
-func newRankers(table map[string][]string) []*ranker {
-	rs := make([]*ranker, len(table))
+type proposor struct {
+	name  string
+	seen  int
+	toSee []string
+}
+
+func (r *proposor) next() string {
+	r.seen++
+	return r.toSee[r.seen]
+}
+
+func newAcceptors(table Table) map[string]*acceptor {
+	as := make(map[string]*acceptor)
 	for name, ranks := range table {
-		rs = append(rs, newRanker(name, ranks))
+		as[name] = newAcceptor(name, ranks)
 	}
-	return rs
+	return as
 }
 
-// Rank returs the rank, the lesser the better
-func (r *ranker) Rank(other ranker) int {
-	for i, name := range r.toSee {
-		if name == other.name {
-			return i
-		}
+func newAcceptor(name string, ranks []string) *acceptor {
+	mapified := make(map[string]int)
+	for i, pname := range ranks {
+		mapified[pname] = i
 	}
-	return math.MaxInt
+	return &acceptor{
+		name:  name,
+		ranks: mapified,
+	}
 }
 
-func (r *ranker) FirstIsPreferred(first, second string) bool {
-	rank1, rank2 := -1, -1
-	for i, name := range r.toSee {
-		if rank1 > -1 && rank2 > -1 {
-			break
-		}
-		if name == first {
-			rank1 = i
-			continue
-		}
-		if name == second {
-			rank2 = i
-			continue
-		}
+type acceptor struct {
+	name  string
+	ranks map[string]int
+}
+
+func (a *acceptor) FirstIsPreferred(first, second string) bool {
+	rank1, ok := a.ranks[first]
+	if !ok {
+		return false
 	}
+
+	rank2, ok := a.ranks[second]
+	if !ok {
+		return true
+	}
+
 	return rank1 < rank2
+}
+
+func NewMatcher(proposorRanks, acceptorRanks Table) *Matcher {
+	return &Matcher{
+		pairs:     make(map[string]string),
+		proposers: newProposors(proposorRanks),
+		acceptors: newAcceptors(acceptorRanks),
+		free:      make(chan string),
+	}
 }
 
 type Matcher struct {
@@ -68,8 +85,8 @@ type Matcher struct {
 	pairs map[string]string
 
 	// maps by name
-	proposers map[string]*ranker
-	acceptors map[string]*ranker
+	proposers map[string]*proposor
+	acceptors map[string]*acceptor
 
 	// the free proposers queue
 	free chan string
